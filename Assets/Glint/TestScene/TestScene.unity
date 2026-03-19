@@ -239,14 +239,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   screenSize: {x: 0, y: 0, z: 0}
   origin: {x: 0, y: 0, z: 0}
+  gridSize: 10
+  minGridSize: 2
   originSize: 0.6
-  axisColor: {r: 1, g: 0, b: 0, a: 1}
-  lineColor: {r: 0, g: 1, b: 0, a: 1}
+  divisionCount: 5
+  minDivisionCount: 2
+  lineColor: {r: 0.33962262, g: 0.33962262, b: 0.33962262, a: 1}
   divisionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  isDrawingOrigin: 0
+  axisColor: {r: 1, g: 1, b: 1, a: 1}
+  isDrawingOrigin: 1
   isDrawingAxis: 1
   isDrawingDivisions: 1
-  isDrawing: 1
 --- !u!1 &1043325343
 GameObject:
   m_ObjectHideFlags: 0

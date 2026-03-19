@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class Grid2D : MonoBehaviour
 {
@@ -9,37 +11,41 @@ public class Grid2D : MonoBehaviour
     public Vector3 screenSize;
     public Vector3 origin;
 
-    float gridSize = 10f;
-    float minGridSize = 2f;
+    public float gridSize = 10f;
+    public float minGridSize = 2f;
     public float originSize = .6f;
 
-    int divisionCount = 5;
-    int divisionCountMult = 1;
-    int minDivisionCount = 2;
-    int minDivisionCountMult = 1;
+    public int divisionCount = 5;
+    public int minDivisionCount = 2;
 
-    public Color axisColor = Color.white;
     public Color lineColor = Color.gray;
     public Color divisionColor = Color.yellow;
+    public Color axisColor = Color.white;
 
+    public bool isDrawingObjects = true; 
+    public bool isDrawingGrid = true; 
     public bool isDrawingOrigin = false;
     public bool isDrawingAxis = true;
     public bool isDrawingDivisions = true;
-    public bool isDrawing = false;
 
-
+    List<DrawingObject> drawObjects;
 
     private void Start()
     {
         screenSize = new Vector3(Screen.width, Screen.height);
         origin = new Vector3(Screen.width / 2, Screen.height / 2);
+
+        drawObjects = new List<DrawingObject>();
+        drawObjects.Add(new Arrow());
     }
 
     void Update()
     {
         GetInput();
-        isDrawing = true;
-        DrawGrid(); 
+
+        DrawGrid();
+
+        DrawObjects(); 
     }
 
     /// <summary>
@@ -59,8 +65,55 @@ public class Grid2D : MonoBehaviour
 
         if (mouse.middleButton.isPressed)
         {
-            origin = mouse.position.ReadValue(); 
+            origin = mouse.position.ReadValue();
         }
+
+        Vector2 Scroll = mouse.scroll.ReadValue();
+
+        if (Scroll.y > 0 && !(keyboard.ctrlKey.IsPressed()))
+        {
+            gridSize++;
+        }
+
+        if (Scroll.y < 0 && !(keyboard.ctrlKey.IsPressed()))
+        {
+            gridSize--;
+
+            if (gridSize <= minGridSize)
+            {
+                gridSize = minGridSize;
+            }
+        }
+
+        if (Scroll.y > 0 && keyboard.ctrlKey.IsPressed())
+        {
+            divisionCount++;
+        }
+
+        if (Scroll.y < 0 && keyboard.ctrlKey.IsPressed())
+        {
+            divisionCount--;
+
+            if (divisionCount <= minDivisionCount)
+            {
+                divisionCount = minDivisionCount;
+            }
+        }
+
+        if (keyboard.digit1Key.wasPressedThisFrame)
+        { isDrawingOrigin = !isDrawingOrigin; }
+
+        if (keyboard.digit2Key.wasPressedThisFrame)
+        { isDrawingAxis = !isDrawingAxis; }
+
+        if (keyboard.digit3Key.wasPressedThisFrame)
+        { isDrawingDivisions = !isDrawingDivisions; }
+
+        if (keyboard.digit4Key.wasPressedThisFrame)
+        { isDrawingGrid = !isDrawingGrid; }
+
+        if (keyboard.digit5Key.wasPressedThisFrame)
+        { isDrawingObjects = !isDrawingObjects; }
     }
 
     /// <summary>
@@ -68,86 +121,151 @@ public class Grid2D : MonoBehaviour
     /// </summary>
     void DrawGrid()
     {
+        if (!isDrawingGrid) { return; }
+
+
+        bool isDrawing = true;
+        Color drawColor = lineColor;
+
+        Vector3 PosPoint = Vector3.zero;
+        Vector3 NegPoint = Vector3.zero;
+        Vector3 PointOffset = Vector3.zero;
+
+        int lineIndex = 0;
+
+        bool posOut = false;
+        bool negOut = false;
+
         while (isDrawing)
         {
-            DrawMinDivision(minDivisionCountMult);
-            DrawDivision(divisionCountMult);
-            DrawOriginAxis();
-            DrawOrigin();
-            isDrawing = false;
+            // 1. Figire out What color to Draw
+            // Normal Line 
+            drawColor = lineColor;
+
+            if (isDrawingOrigin && (lineIndex == 0)) 
+            {
+                drawColor = axisColor;
+                DrawOrigin(drawColor);
+                drawColor = lineColor;
+            }
+
+            if (isDrawingDivisions && ((lineIndex % divisionCount) == 0))
+            {
+                drawColor = divisionColor;
+            }
+
+            // Then check if Axis Lines
+            if (isDrawingAxis && (lineIndex == 0))
+            {
+                drawColor = axisColor;
+            }
+
+
+
+            // 2. Figure out the two Points to draw 
+            PointOffset = new Vector3(gridSize, gridSize, 0) * lineIndex;
+            PosPoint = origin + PointOffset;
+            NegPoint = origin - PointOffset;
+
+            // 3. Draw Lines 
+
+            DrawLinesAtPoint(PosPoint, drawColor);
+            DrawLinesAtPoint(NegPoint, drawColor);
+
+            // 4. Figure out when to stop. 
+            if ((PosPoint.x < 0 || PosPoint.x > Screen.width) && (PosPoint.y < 0 || PosPoint.y > Screen.height))
+            { posOut = true; }
+
+            if ((NegPoint.x < 0 || NegPoint.x > Screen.width) && (NegPoint.y < 0 || NegPoint.y > Screen.height))
+            { negOut = true; }
+
+
+
+            lineIndex++;
+            // TO DO: Improve this Later 
+            if (posOut && negOut)
+            {
+                isDrawing = false;
+            }
+
+
         }
+
+        
     }
+
+    public void DrawObjects()
+    {
+        if (!isDrawingObjects) { return; }
+
+        foreach (DrawingObject drawObject in drawObjects)
+        {
+            drawObject.Draw(this);
+        }
+
+    }
+
 
     /// <summary>
     /// Draws the Diamond symbol at the Origin
     /// </summary>
     public void DrawOriginAxis()
     {
-        if (isDrawingAxis)
-        {
-            Vector3 originXStart = origin;
-            originXStart.x = 0;
-            Vector3 originXEnd = origin;
-            originXEnd.x = Screen.width;
-            Vector3 originYStart = origin;
-            originYStart.y = 0;
-            Vector3 originYEnd = origin;
-            originYEnd.y = Screen.height;
 
-            // Draw origin x axis
-            DrawLine(originXStart, originXEnd, axisColor);
-            //Draw Origin Y axis
-            DrawLine(originYStart, originYEnd, axisColor);
-        }
-    } 
+        Vector3 originXStart = origin;
+        originXStart.x = 0;
+        Vector3 originXEnd = origin;
+        originXEnd.x = Screen.width;
+        Vector3 originYStart = origin;
+        originYStart.y = 0;
+        Vector3 originYEnd = origin;
+        originYEnd.y = Screen.height;
 
-    public void DrawOrigin()
-    {
-        if (isDrawingOrigin)
-        {
-            //
-        }
+        // Draw origin x axis
+        DrawLine(originXStart, originXEnd, axisColor, false);
+        //Draw Origin Y axis
+        DrawLine(originYStart, originYEnd, axisColor, false);
+
     }
 
-    public void DrawDivision(int mult)
+    public void DrawLinesAtPoint(Vector3 point, Color drawingColor)
     {
-        Vector3 divisionXStart = origin;
-        divisionXStart.x = 0;
-        divisionXStart.y += (divisionCount * gridSize * mult);
-        Vector3 divisionXEnd = origin;
-        divisionXEnd.x = Screen.width;
-        divisionXEnd.y += (divisionCount * gridSize * mult);
-        Vector3 divisionYStart = origin;
-        divisionYStart.x += (divisionCount * gridSize * mult);
-        divisionYStart.y = 0;
-        Vector3 divisionYEnd = origin;
-        divisionYEnd.x += (divisionCount * gridSize * mult);
-        divisionYEnd.y = Screen.height;
 
-        DrawLine(divisionXStart, divisionXEnd, divisionColor);
+        Vector3 XStart = point;
+        XStart.x = 0;
+        Vector3 XEnd = point;
+        XEnd.x = Screen.width;
+        Vector3 YStart = point;
+        YStart.y = 0;
+        Vector3 YEnd = point;
+        YEnd.y = Screen.height;
 
-        DrawLine(divisionYStart, divisionYEnd, divisionColor);
+        // Draw origin x axis
+        DrawLine(XStart, XEnd, drawingColor, false);
+        //Draw Origin Y axis
+        DrawLine(YStart, YEnd, drawingColor, false);
+
     }
 
-    public void DrawMinDivision(int mult)
+    public void DrawOrigin(Color drawingColor)
     {
-        Vector3 minDivisionXStart = origin;
-        minDivisionXStart.x = 0;
-        minDivisionXStart.y += (minDivisionCount * gridSize * mult);
-        Vector3 minDivisionXEnd = origin;
-        minDivisionXEnd.x = Screen.width;
-        minDivisionXEnd.y += (minDivisionCount * gridSize * mult);
-        Vector3 minDivisionYStart = origin;
-        minDivisionYStart.x += (minDivisionCount * gridSize * mult); 
-        minDivisionYStart.y = 0;
-        Vector3 minDivisionYEnd = origin;
-        minDivisionYEnd.x += (minDivisionCount * gridSize * mult);
-        minDivisionYEnd.y = Screen.height;
 
-        DrawLine(minDivisionXStart, minDivisionXEnd, lineColor);
+        Vector3 pointOne = origin;
+        pointOne.x += originSize * gridSize;
+        Vector3 pointTwo = origin;
+        pointTwo.y -= originSize * gridSize;
+        Vector3 pointThree = origin;
+        pointThree.x -= originSize * gridSize;
+        Vector3 pointFour = origin;
+        pointFour.y += originSize * gridSize;
 
-        DrawLine(minDivisionYStart, minDivisionYEnd, lineColor);
+        DrawLine(pointOne, pointTwo, drawingColor, false); 
+        DrawLine(pointTwo, pointThree, drawingColor, false);
+        DrawLine(pointThree, pointFour, drawingColor, false);
+        DrawLine(pointFour, pointOne, drawingColor, false);
     }
+
+
 
 
     /// <summary>
@@ -157,7 +275,9 @@ public class Grid2D : MonoBehaviour
     /// <returns>Vector3 translated to Screen Space</returns>
     public Vector3 GridToScreen(Vector3 gridSpace)
     {
-        return Vector3.zero;
+        Vector3 screenSpace = Vector3.zero;
+        screenSpace = origin + (gridSpace * gridSize);
+        return screenSpace;
     }
 
     /// <summary>
@@ -167,16 +287,36 @@ public class Grid2D : MonoBehaviour
     /// <returns>Vector3 translated to Grid Space</returns>
     public Vector3 ScreenToGrid(Vector3 screenSpace)
     {
-        return Vector3.zero;
+        Vector3 gridSpace = Vector3.zero;
+        gridSpace = (screenSpace - origin) / gridSize;
+        return gridSpace;
+    }
+
+    public static float V3ToAngle(Vector3 startPoint, Vector3 endPoint)
+    {
+        Vector3 difference = endPoint - startPoint;
+        return Mathf.Rad2Deg * Mathf.Atan2(difference.x, difference.y);
+    }
+
+    public static float LineToAngle(Line line)
+    {
+        return V3ToAngle(line.start, line.end);
     }
 
     /// <summary>
     /// Draws the given line object. If you are creating new line object, use the overload that takes parameters instead. 
     /// </summary>
     /// <param name="line"></param>
-    public void DrawLine(Line line)
+    public void DrawLine(Line line, bool drawOnGrid = true)
     {
-        Glint.AddCommand(line);
+        if (drawOnGrid)
+        {
+            DrawLine(line.start, line.end, line.color, drawOnGrid);
+        }
+        else
+        {
+            Glint.AddCommand(line);
+        }
     }
 
     /// <summary>
@@ -185,11 +325,22 @@ public class Grid2D : MonoBehaviour
     /// <param name="start"></param>
     /// <param name="end"></param>
     /// <param name="color"></param>
-    public void DrawLine(Vector3 start, Vector3 end, Color color)
+    public void DrawLine(Vector3 start, Vector3 end, Color color, bool drawOnGrid = true)
     {
-        Glint.AddCommand(new Line(start, end, color));
+        if (drawOnGrid)
+        {
+            Glint.AddCommand(new Line(GridToScreen(start), GridToScreen(end), color));
+        }
+        else
+        {
+            Glint.AddCommand(new Line(start, end, color));
+        }
+
+       
     }
 
-    //Draws the Origin Point (or Symbol)
-
+    public void DrawObjects(DrawingObject lineObj, bool DrawOnGrid = true)
+    {
+        lineObj.Draw(this);
+    }
 }

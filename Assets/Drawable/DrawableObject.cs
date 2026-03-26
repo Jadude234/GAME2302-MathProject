@@ -29,6 +29,11 @@ public class DrawableObject
 
     }
 
+    public virtual void Tick()
+    {
+        //Test
+    }
+
     public void AddLineToObject(Line line)
     {
         LineList.Add(line);
@@ -54,6 +59,44 @@ public class DrawableObject
         {
             grid.DrawLine(TranslateLinePoints(LineList[i]));
         }
+    }
+
+    public float GetRotationinDegrees()
+    {
+        return 0;
+    }
+
+    public void SetRotationinDegrees(float degrees)
+    {
+        //
+    }
+
+    public static float V3ToAngle(Vector3 startPoint, Vector3 endPoint)
+    {
+        Vector3 lineVector = endPoint - startPoint;
+        float radians = Mathf.Atan2(lineVector.y, lineVector.x);
+        return radians;
+    }
+
+    public static float V3ToAngleinDegrees(Vector3 startPoint, Vector3 endPoint)
+    {
+        Vector3 lineVector = endPoint - startPoint;
+        float radians = Mathf.Atan2(lineVector.y, lineVector.x);
+        return (radians * Mathf.Rad2Deg);
+    }
+
+    public static float LineToAngle(Line line)
+    {
+        return V3ToAngle(line.start, line.end);
+    }
+
+    public static Vector3 RotatePoint(Vector3 Center, Vector3 pointIN, float angle)
+    {
+        // if not AT 000- translate back to origin
+        Vector3 result = pointIN - Center;
+
+        // translate back to center point
+        return (result + Center);
     }
 
     /// <summary>

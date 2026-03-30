@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Drawing.Glint;
 using System;
 using Unity.VisualScripting;
 
@@ -13,7 +12,8 @@ public class DrawableObject
 
     // Transform information 
     public Vector3 Position = Vector3.zero;
-    public float Roation = 0;
+    // In Radians
+    public float Rotation = 0;
     public Vector3 Scale = Vector3.one;
 
     public List<Line> LineList;
@@ -90,10 +90,14 @@ public class DrawableObject
         return V3ToAngle(line.start, line.end);
     }
 
-    public static Vector3 RotatePoint(Vector3 Center, Vector3 pointIN, float angle)
+    public static Vector3 RotatePoint(Vector3 Center, Vector3 pointIN, float angleInRadians)
     {
         // if not AT 000- translate back to origin
-        Vector3 result = pointIN - Center;
+        Vector3 pointAtZero = pointIN - Center;
+        Vector3 result = Vector3.zero;
+
+        result.x = pointAtZero.x * Mathf.Cos(angleInRadians) - pointAtZero.y * Mathf.Sin(angleInRadians);
+        result.y = pointAtZero.x * Mathf.Sin(angleInRadians) + pointAtZero.y * Mathf.Cos(angleInRadians);
 
         // translate back to center point
         return (result + Center);
@@ -118,6 +122,8 @@ public class DrawableObject
         translatedLine.end.z *= Scale.z;
 
         // Rotate
+        translatedLine.start = RotatePoint(Vector3.zero, translatedLine.start, Rotation);
+        translatedLine.end = RotatePoint(Vector3.zero, translatedLine.start, Rotation);
 
         // Position
         translatedLine.start += Position;

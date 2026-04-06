@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using Unity.VisualScripting;
 
 [Serializable]
 public class DrawableObject
@@ -51,6 +50,7 @@ public class DrawableObject
     /// <param name="grid">Optional, When a Grid2d is applied, object is drawn relative to the grid and location is in Grid space</param>
     public virtual void Draw(DrawableGrid grid)
     {
+
         if (!PerformDraw) { return; }
         if (LineList == null) { return; }
         if (LineList.Count == 0) { return; }
@@ -63,12 +63,12 @@ public class DrawableObject
 
     public float GetRotationinDegrees()
     {
-        return 0;
+        return Rotation * Mathf.Rad2Deg;
     }
 
     public void SetRotationinDegrees(float degrees)
     {
-        //
+        Rotation = degrees * Mathf.Deg2Rad;
     }
 
     public static float V3ToAngle(Vector3 startPoint, Vector3 endPoint)
@@ -123,7 +123,7 @@ public class DrawableObject
 
         // Rotate
         translatedLine.start = RotatePoint(Vector3.zero, translatedLine.start, Rotation);
-        translatedLine.end = RotatePoint(Vector3.zero, translatedLine.start, Rotation);
+        translatedLine.end = RotatePoint(Vector3.zero, translatedLine.end, Rotation);
 
         // Position
         translatedLine.start += Position;

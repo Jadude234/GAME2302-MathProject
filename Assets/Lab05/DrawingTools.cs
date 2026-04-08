@@ -11,7 +11,25 @@ public class DrawingTools
     /// <param name="grid"> if grid = null, info in Rect is in screen coordinates, else info is in grid space</param>
     public static void DrawRectangle(Rect box, Color color, DrawableGrid grid = null)
     {
-        //AddLineToObject(new Vector3(1, 0, 0), new Vector3(0, 1, 0), Color.red);
+        Line bottom = new Line(new Vector2(box.X, box.Y), new Vector2((box.X + box.Width), box.Y), color);
+        Line top = new Line(new Vector2((box.X + box.Width), (box.Y + box.Height)), new Vector2(box.X, (box.Y + box.Height)), color);
+        Line left = new Line (new Vector2(box.X, (box.Y + box.Height)), new Vector2(box.X, box.Y), color);
+        Line right = new Line(new Vector2((box.X + box.Width), box.Y), new Vector2((box.X + box.Width), (box.Y + box.Height)), color);
+
+        if (grid == null)
+        {
+            Glint.AddCommand(bottom);
+            Glint.AddCommand(top);
+            Glint.AddCommand(left);
+            Glint.AddCommand(right);
+        }
+        else
+        {
+            grid.DrawLine(bottom);
+            grid.DrawLine(top);
+            grid.DrawLine(left);
+            grid.DrawLine(right);
+        }
 
     }
 
@@ -34,7 +52,7 @@ public class DrawingTools
     /// <param name="origin">Center of the Cirle</param>
     /// <param name="angle">Angle in degrees, 0 degrees at (1,0,0)</param>
     /// <param name="axis">length and axis of the elipse, this is half of the width or height</param>
-    /// <returns>point in Vector3</returns>
+    /// <returns>point in Vector3</returns> 
     public static Vector3 EllipseRadiusPoint(Vector3 origin, float angle, Vector3 axis)
     {
         // stub code, replace this

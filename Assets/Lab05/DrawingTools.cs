@@ -42,8 +42,11 @@ public class DrawingTools
     /// <returns>point in Vector3</returns>
     public static Vector3 CircleRadiusPoint(Vector3 origin, float angle, float radius)
     {
-        // stub code, replace this
-        return Vector3.zero;
+        Vector3 result = Vector3.zero;
+        result.x = Mathf.Cos(angle * Mathf.Deg2Rad) * radius;
+        result.y = Mathf.Sin(angle * Mathf.Deg2Rad) * radius;
+        result += origin;
+        return result;
     }
 
     /// <summary>
@@ -55,8 +58,11 @@ public class DrawingTools
     /// <returns>point in Vector3</returns> 
     public static Vector3 EllipseRadiusPoint(Vector3 origin, float angle, Vector3 axis)
     {
-        // stub code, replace this
-        return Vector3.zero;
+        Vector3 result = Vector3.zero;
+        result.x = Mathf.Cos(angle * Mathf.Deg2Rad) * axis.x;
+        result.y = Mathf.Sin(angle * Mathf.Deg2Rad) * axis.y;
+        result += origin;
+        return result;
     }
 
     /// <summary>
@@ -68,7 +74,18 @@ public class DrawingTools
     /// <param name="color">Color to draw, use Color.####</param>
     public static void DrawCircle(Vector3 position, float radius, int sides, Color color)
     {
+        //Makes sure enough sides
+        int numberofSides = sides;
+        if (numberofSides < 3) {numberofSides = 12;}
 
+        float degreeStep = 360 / numberofSides;
+        Vector3 Start = Vector3.zero, End = Vector3.zero;
+
+        for (int i = 0; i < numberofSides; i++)
+        {
+            Start = CircleRadiusPoint(position, (degreeStep * i), radius);
+            End = CircleRadiusPoint(position, (degreeStep * (i + 1)), radius);
+        }
     }
 
     /// <summary>
@@ -80,7 +97,9 @@ public class DrawingTools
     /// <param name="color">Color to draw, use Color.####</param>
     public static void DrawEllipse(Vector3 position, Vector2 axis, int sides, Color color)
     {
-
+        //Makes sure enough sides
+        int numberofSides = sides;
+        if (numberofSides < 3) { numberofSides = 12; }
     }
 
     public static DrawableObject CreateCircleObject(Vector3 position, float radius, int sides, Color color)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 using Rect = System.Drawing.Rectangle;
@@ -41,18 +42,25 @@ public static class CollisionTools
 
     public static bool IsPointInCircle(Vector3 Point, Vector3 Center, float Radius)
     {
-        // stub code 
-        return true; 
+        return (Center - Point).magnitude < Radius; 
     }
 
     public static bool IsPointInRectangle(Vector3 Point, Rect Rectangle)
     {
-        // stub code 
-        return false;
+        return (Point.x >= Mathf.Min(Rectangle.X, (Rectangle.X + Rectangle.Width))) && (Point.x <= Mathf.Max(Rectangle.X, (Rectangle.X + Rectangle.Width))) && 
+            (Point.y >= Mathf.Min(Rectangle.Y, (Rectangle.Y + Rectangle.Height))) && (Point.y <= Mathf.Max(Rectangle.Y, (Rectangle.Y + Rectangle.Height)));
     }
     public static bool IsPointInTriangle(Vector3 Point, TriangleData Triangle)
     {
         // stub code 
-        return false;
+        return TriangleCalculation(Point, Triangle.PointA, Triangle.PointB, Triangle.PointC) && TriangleCalculation(Point, Triangle.PointB, Triangle.PointC, Triangle.PointA) && 
+            TriangleCalculation(Point, Triangle.PointC, Triangle.PointA, Triangle.PointB);
+    }
+
+    public static bool TriangleCalculation(Vector3 point, Vector3 compare, Vector3 start, Vector3 end)
+    {
+        Vector3 cp1 = Vector3.Cross(end - start, point - start);
+        Vector3 cp2 = Vector3.Cross(end - start, compare - start);
+        return Vector3.Dot(cp1, cp2) >= 0;
     }
 }

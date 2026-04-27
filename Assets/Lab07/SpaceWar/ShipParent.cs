@@ -61,7 +61,7 @@ public class ShipParent : MovingObject
 
     public void RotateShip(float value)
     {
-        this.Rotation = (value * ShipRotationSpeed * Time.deltaTime * Mathf.Deg2Rad); 
+        this.Rotation = (value * ShipRotationSpeed * Time.deltaTime * Mathf.Deg2Rad);
     }
 
     public void FireMissle(DrawableGrid grid, int sceneIndex)

@@ -17,7 +17,24 @@ public class Missle : MovingObject
 
     public override void Tick()
     {
+        base.Tick();
         
+        if (CheckForCollisionWith(SpaceWarGrid.self.ShipAObject))
+        {
+            Debug.Log("Hit Ship A");
+        }
+
+        if (CheckForCollisionWith(SpaceWarGrid.self.ShipBObject))
+        {
+            Debug.Log("Hit Ship B");
+        }
+    }
+
+    public void MakeMissle(float angle, Vector3 spawnPosition, Grid grid, int sceneIndex)
+    {
+        //keep in mind radius of ship and missile is ten and two respectively for spawn position, angle is angle of the ship or based off it
+        Missle missle = new Missle();
+        LaunchMissle(angle);
     }
 
     public void LaunchMissle(float angle)

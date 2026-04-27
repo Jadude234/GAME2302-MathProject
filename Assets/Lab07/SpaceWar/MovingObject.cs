@@ -20,10 +20,24 @@ public class MovingObject : DrawableObject
         UpdatePostion();
         DrawCollision(); 
     }
-
+    
     public void UpdatePostion()
     {
-       
+        /*Newton's laws of motion
+         *  1: Positions - where you are at
+         *  2: Velocity - The change of position over time (meters/sec)
+         *  3: Acceleration - change in velocity over time
+         *  4: Acceleration/Decelleration
+         *  4a: Acceleration is when the absolute change in velocity is increasing (away from 0)
+         *  4b: Decelleration is when the absolute change in velocity is decreasing (towards 0)
+         *  
+         * */
+        // for gameplay
+        if (Velocity.magnitude > MaxVelocity)
+        {
+            Velocity = Velocity.normalized * MaxVelocity;
+        }
+        Position += Velocity * Time.deltaTime;
 
     }
 

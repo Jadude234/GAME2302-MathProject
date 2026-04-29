@@ -3,7 +3,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 using Rect = System.Drawing.Rectangle;
-public static class CollisionTools 
+public static class CollisionTools
 {
     public static void DrawTriangle(TriangleData data, Color color, DrawableGrid grid = null)
     {
@@ -16,7 +16,7 @@ public static class CollisionTools
             // Info is in Screen Space 
             Glint.AddCommand(lineA);
             Glint.AddCommand(lineB);
-            Glint.AddCommand(lineC); 
+            Glint.AddCommand(lineC);
         }
         else
         {
@@ -26,7 +26,7 @@ public static class CollisionTools
         }
     }
 
-    public static void SetColor(DrawableObject thing,  Color color)
+    public static void SetColor(DrawableObject thing, Color color)
     {
         for (int i = 0; i < thing.LineList.Count; i++)
         {
@@ -42,18 +42,18 @@ public static class CollisionTools
 
     public static bool IsPointInCircle(Vector3 Point, Vector3 Center, float Radius)
     {
-        return (Center - Point).magnitude < Radius; 
+        return (Center - Point).magnitude < Radius;
     }
 
     public static bool IsPointInRectangle(Vector3 Point, Rect Rectangle)
     {
-        return (Point.x >= Mathf.Min(Rectangle.X, (Rectangle.X + Rectangle.Width))) && (Point.x <= Mathf.Max(Rectangle.X, (Rectangle.X + Rectangle.Width))) && 
+        return (Point.x >= Mathf.Min(Rectangle.X, (Rectangle.X + Rectangle.Width))) && (Point.x <= Mathf.Max(Rectangle.X, (Rectangle.X + Rectangle.Width))) &&
             (Point.y >= Mathf.Min(Rectangle.Y, (Rectangle.Y + Rectangle.Height))) && (Point.y <= Mathf.Max(Rectangle.Y, (Rectangle.Y + Rectangle.Height)));
     }
     public static bool IsPointInTriangle(Vector3 Point, TriangleData Triangle)
     {
         // stub code 
-        return TriangleCalculation(Point, Triangle.PointA, Triangle.PointB, Triangle.PointC) && TriangleCalculation(Point, Triangle.PointB, Triangle.PointC, Triangle.PointA) && 
+        return TriangleCalculation(Point, Triangle.PointA, Triangle.PointB, Triangle.PointC) && TriangleCalculation(Point, Triangle.PointB, Triangle.PointC, Triangle.PointA) &&
             TriangleCalculation(Point, Triangle.PointC, Triangle.PointA, Triangle.PointB);
     }
 
@@ -63,4 +63,30 @@ public static class CollisionTools
         Vector3 cp2 = Vector3.Cross(end - start, compare - start);
         return Vector3.Dot(cp1, cp2) >= 0;
     }
+
+
+    public static bool DoesLineIntersectCircle(Vector3 LineStart, Vector3 LineEnd, Vector3 CircleCenter, float CircleRadius)
+    {
+        // Stub Code
+        return false;
+    }
+
+public static bool DoesLineIntersectCircle(Vector3 LineStart, Vector3 LineEnd, Vector3 CircleCenter, float CircleRadius, DrawableObject Intersect1, DrawableObject Intersect2)
+    {
+        // Stub Code 
+        return false;
+    }
+
+public static List<Vector3> IntersectionPoint(Vector3 p1, Vector3 p2, Vector3 center, float radius)
+    {
+        List<Vector3> result = new List<Vector3>();
+        return result;
+    }
+
+    public static bool IsInLineSegment(Vector3 point, Vector3 start, Vector3 end)
+    {
+        // Stub Code
+        return false;
+    }
+
 }

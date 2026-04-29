@@ -39,6 +39,12 @@ public class MovingObject : DrawableObject
         }
         Position += Velocity * Time.deltaTime;
 
+        //ScreenWarping
+        if (willScreenWarp && Position.magnitude > SpaceWarGrid.self.MagicCircleRadius)
+        {
+            Position *= -1;
+        }
+
     }
 
     public void DrawCollision()
@@ -60,6 +66,8 @@ public class MovingObject : DrawableObject
 
     public bool CheckForCollisionWith(MovingObject other)
     {
-        return false; 
+        Vector3  distanceVector = other.Position - this.Position;
+        float combinedRadii = other.CollisionRadius + this.CollisionRadius;
+        return (distanceVector.magnitude < combinedRadii); 
     }
 }

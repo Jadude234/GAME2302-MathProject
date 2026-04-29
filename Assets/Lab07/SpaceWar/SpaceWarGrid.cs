@@ -1,3 +1,5 @@
+using NUnit.Framework.Interfaces;
+using NUnit.Framework.Internal.Commands;
 using System.Collections.Generic; 
 using UnityEngine;
 using UnityEngine.InputSystem; 
@@ -8,6 +10,7 @@ public class SpaceWarGrid : DrawableGrid
 
 
     public bool isPlayingGame = false;
+    public bool IsApplyingGravity = true; 
 
     int sceneIndex = 0;
 
@@ -16,7 +19,8 @@ public class SpaceWarGrid : DrawableGrid
     public ShipParent ShipBObject;
 
     public DrawableObject DebugMagicCircle;
-    public float MagicCircleRadius = 150; 
+    public float MagicCircleRadius = 150;
+    public float ForceOfGravity = 10f; 
 
     public List<MovingObject> MovingObjectlist = new List<MovingObject>();
 
@@ -37,6 +41,7 @@ public class SpaceWarGrid : DrawableGrid
     bool P2_FireMissle = false;
     bool P1_FireLaser = false;
     bool P2_FireLaser = false;
+    bool GAME_GravitySwitch = false; 
 
     public void Awake()
     {
@@ -45,23 +50,26 @@ public class SpaceWarGrid : DrawableGrid
 
     public override void SetupScenes()
     {
-        sceneIndex = AddScene("Lab 07: SpaceWar");
         
+        sceneIndex = AddScene("SpaceWar");
+        
+        /*
         missleObject = new Missle();
         missleObject.Position = new Vector3(0, 15, 0);
         //missleObject.SetRotationinDegrees(75);
         missleObject.CreateCollision(2, this, sceneIndex);
-        missleObject.willDrawCollision = true;
+        //missleObject.willDrawCollision = true;
         missleObject.LaunchMissle(25);
         AddObjectToScene(sceneIndex, missleObject);
         MovingObjectlist.Add(missleObject);
+        */
 
         ShipAObject = new ShipParent();
         ShipAObject.SetupA(this, sceneIndex); 
         ShipAObject.Position = new Vector3(100, 0, 0);
         ShipAObject.SetRotationinDegrees(180);
         ShipAObject.CreateCollision(10, this, sceneIndex);
-        ShipAObject.willDrawCollision = true;
+        //ShipAObject.willDrawCollision = true;
         AddObjectToScene(sceneIndex, ShipAObject);
         MovingObjectlist.Add(ShipAObject);
 
@@ -69,7 +77,7 @@ public class SpaceWarGrid : DrawableGrid
         ShipBObject.SetupB(this, sceneIndex);
         ShipBObject.Position = new Vector3(-15, 0, 0);
         ShipBObject.CreateCollision(10, this, sceneIndex);
-        ShipBObject.willDrawCollision = true; 
+        //ShipBObject.willDrawCollision = true; 
         AddObjectToScene(sceneIndex, ShipBObject);
         MovingObjectlist.Add(ShipBObject);
 
@@ -77,6 +85,39 @@ public class SpaceWarGrid : DrawableGrid
         AddObjectToScene(sceneIndex, DebugMagicCircle);
 
     }
+
+    public void RemoveObject(DrawableObject removeObject)
+    {
+        RemoveList.Add(removeObject, sceneIndex);
+        // doesn't work in foreach loop dont use
+        //SceneList[sceneIndex].Remove(removeObject);
+    }
+
+    public override void CleanUpScenes()
+    {
+        if (RemoveList.Count == 0)
+        { return; }
+        // don't do anything if there's nothng in the list. 
+
+
+        foreach (var item in RemoveList)
+        {
+            SceneList[item.Value].Remove(item.Key);
+
+            // Need to Check if it's a moving object and remove from that list. 
+
+            // Won't let us use Item.Ket in If Statement... shrugs
+            DrawableObject itemObject = item.Key; 
+
+            if (itemObject is MovingObject)
+            {
+                MovingObjectlist.Remove(((MovingObject)itemObject));
+            }
+        }
+
+        RemoveList.Clear();
+    }
+
 
     public override void ProcessInput(Keyboard kb, Mouse mouse)
     {
@@ -91,19 +132,41 @@ public class SpaceWarGrid : DrawableGrid
         P2_CCWRotation = kb.jKey.isPressed;
         P2_FireMissle = kb.uKey.wasPressedThisFrame;
         P2_FireLaser = kb.oKey.wasPressedThisFrame;
+
+        GAME_GravitySwitch = kb.f3Key.wasPressedThisFrame; 
     }
 
-
+    public void AddScore(bool isShipA)
+    {
+        if (isShipA)
+        {
+            PlayerAScore++;
+        }
+        else
+        { 
+            PlayerBScore++; 
+        }
+    }
 
     public override void Tick()
     {
-        // Remove Me!
-        TestStuff();
 
-        HandleInput(); 
+        HandleInput();
 
+        ApplyGravity(); 
 
-    } 
+    }
+
+    public void ApplyGravity()
+    {
+        if (!IsApplyingGravity) { return; }
+        // bool contorl. 
+
+        foreach (MovingObject item in MovingObjectlist)
+        {
+            item.Velocity += -item.Position.normalized * ForceOfGravity * Time.deltaTime; 
+        }
+    }
 
     public void HandleInput()
     {
@@ -118,6 +181,8 @@ public class SpaceWarGrid : DrawableGrid
         if (P2_CCWRotation) { ShipBObject.RotateShip(-1); }
         if (P2_FireMissle) { ShipBObject.FireMissle(this, sceneIndex); }
         if (P2_FireLaser) { ShipBObject.FireLaser(this, sceneIndex); }
+
+        if (GAME_GravitySwitch) { IsApplyingGravity = !IsApplyingGravity; } 
     }
 
     public void TestStuff()

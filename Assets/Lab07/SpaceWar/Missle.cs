@@ -22,19 +22,31 @@ public class Missle : MovingObject
         if (CheckForCollisionWith(SpaceWarGrid.self.ShipAObject))
         {
             Debug.Log("Hit Ship A");
+            SpaceWarGrid.self.PlayerBScore++;
+            RemoveMissle(); 
         }
 
         if (CheckForCollisionWith(SpaceWarGrid.self.ShipBObject))
         {
             Debug.Log("Hit Ship B");
+            SpaceWarGrid.self.PlayerAScore++;
+            RemoveMissle(); 
         }
     }
 
-    public void MakeMissle(float angle, Vector3 spawnPosition, Grid grid, int sceneIndex)
+
+    public void RemoveMissle()
     {
+        SpaceWarGrid.self.RemoveObject(this);
+        if (CollisionCircle != null) { SpaceWarGrid.self.RemoveObject(CollisionCircle); }
+    }
+
+    public static void MakeMissle(float angle, Vector3 spawnPosition, Grid grid, int sceneIndex)
+    {
+        //implement on own
         //keep in mind radius of ship and missile is ten and two respectively for spawn position, angle is angle of the ship or based off it
         Missle missle = new Missle();
-        LaunchMissle(angle);
+        missle.LaunchMissle(angle);
     }
 
     public void LaunchMissle(float angle)

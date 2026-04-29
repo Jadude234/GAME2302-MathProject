@@ -64,17 +64,41 @@ public static class CollisionTools
         return Vector3.Dot(cp1, cp2) >= 0;
     }
 
-
+    // This is a hack to show where the lines are
     public static bool DoesLineIntersectCircle(Vector3 LineStart, Vector3 LineEnd, Vector3 CircleCenter, float CircleRadius)
     {
-        // Stub Code
-        return false;
+        List<Vector3> result = IntersectionPoint(LineStart, LineEnd, CircleCenter, CircleRadius);
+
+        if (result.Count == 0) {return false;}
+
+        return true;
     }
 
 public static bool DoesLineIntersectCircle(Vector3 LineStart, Vector3 LineEnd, Vector3 CircleCenter, float CircleRadius, DrawableObject Intersect1, DrawableObject Intersect2)
     {
-        // Stub Code 
-        return false;
+        List<Vector3> result = IntersectionPoint(LineStart, LineEnd, CircleCenter, CircleRadius);
+
+        if (result.Count == 0) 
+        { 
+            Intersect1.PerformDraw = false;
+            Intersect2.PerformDraw = false;
+            return false;
+        }
+
+        if (result.Count == 1) 
+        { 
+            Intersect1.PerformDraw = true;
+            Intersect1.Position = result[0];
+            Intersect2.PerformDraw = false;
+            return true; 
+        }
+
+        Intersect1.PerformDraw = true;
+        Intersect1.Position = result[0];
+        Intersect2.PerformDraw = true;
+        Intersect2.Position = result[1];
+
+        return true;
     }
 
 public static List<Vector3> IntersectionPoint(Vector3 p1, Vector3 p2, Vector3 center, float radius)
@@ -85,8 +109,12 @@ public static List<Vector3> IntersectionPoint(Vector3 p1, Vector3 p2, Vector3 ce
 
     public static bool IsInLineSegment(Vector3 point, Vector3 start, Vector3 end)
     {
-        // Stub Code
-        return false;
+        return (
+            (Mathf.Min(start.x, end.x) <= point.x) &&
+            (Mathf.Max(start.x, end.x) >= point.x) &&
+            (Mathf.Min(start.y, end.y) <= point.y) &&
+            (Mathf.Max(start.y, end.y) >= point.y)
+            );
     }
 
 }

@@ -17,8 +17,9 @@ public class ShipParent : MovingObject
     public float laserStart = 5;
     public float laserEnd = 200;
     public bool Drawlaser = false;
-    public float LaserShowTime = .5f;
+    public float LaserShowTime = .2f;
     public float LaserShowCoutner = 0;
+    public bool LaserHasHit = false; 
 
     public void SetupA(DrawableGrid grid, int sceneIndex)
     {
@@ -78,13 +79,16 @@ public class ShipParent : MovingObject
 
     public void CheckForLaserCollison()
     {
-        foreach( MovingObject item in SpaceWarGrid.self.MovingObjectlist)
+        if (LaserHasHit) { return;  }
+
+        foreach ( MovingObject item in SpaceWarGrid.self.MovingObjectlist)
         {
             // DO Collection Detection here... 
             if (CollisionTools.DoesLineIntersectCircle(LaserObject.start, LaserObject.end, item.Position, item.CollisionRadius ))
             {
                 if (item is Missle)
                 {
+                    LaserHasHit = true; 
                     Missle other = (Missle)item;
                     other.RemoveMissle(); 
 
@@ -95,6 +99,7 @@ public class ShipParent : MovingObject
                     ShipParent other = (ShipParent)item;
                     if (other.IsShipA != this.IsShipA)
                     {
+                        LaserHasHit = true;
                         SpaceWarGrid.self.AddScore(this.IsShipA); 
                     }
 
@@ -154,6 +159,7 @@ public class ShipParent : MovingObject
 
     public void FireLaser(DrawableGrid grid, int sceneIndex)
     {
+        LaserHasHit = false; 
         Drawlaser = true;
         LaserShowCoutner = LaserShowTime;
     }
